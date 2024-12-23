@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using QuickNote.Data;
+using QuickNote.Services;
 
 namespace QuickNote
 {
@@ -19,6 +21,20 @@ namespace QuickNote
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddTransient<IEmailSender, EmailSender>();
+            var configuration = builder.Configuration;
+            builder.Services.AddAuthentication()
+               .AddGitHub(githubOptions =>
+               {
+                   githubOptions.ClientId = configuration["GitHub:ClientId"];
+                   githubOptions.ClientSecret = configuration["GitHub:Secret"];
+               })
+               .AddGoogle(googleOptions =>
+               {
+                   googleOptions.ClientId = configuration["Google:ClientId"];
+                   googleOptions.ClientSecret = configuration["Google:Secret"];
+               });
 
             var app = builder.Build();
 
@@ -39,6 +55,7 @@ namespace QuickNote
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
