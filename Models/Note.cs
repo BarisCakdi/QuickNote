@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace QuickNote.Models
 {
@@ -28,5 +29,8 @@ namespace QuickNote.Models
         public Status Status { get; set; }
 
         public ICollection<NoteTag> NoteTags { get; set; }
+
+        public string UserId { get; set; } 
+        public IdentityUser User { get; set; }
     }
 }

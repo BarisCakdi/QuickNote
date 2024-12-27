@@ -9,10 +9,10 @@ using QuickNote.Data;
 
 #nullable disable
 
-namespace QuickNote.Data.Migrations
+namespace QuickNote.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241223115039_initial")]
+    [Migration("20241224124217_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -254,23 +254,34 @@ namespace QuickNote.Data.Migrations
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Notes");
                 });
 
             modelBuilder.Entity("QuickNote.Models.NoteTag", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<int>("NoteId")
                         .HasColumnType("int");
 
                     b.Property<int>("TagId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
+                    b.HasKey("Id");
 
-                    b.HasKey("NoteId", "TagId");
+                    b.HasIndex("NoteId");
 
                     b.HasIndex("TagId");
 
@@ -290,7 +301,13 @@ namespace QuickNote.Data.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Tags");
                 });
@@ -346,23 +363,45 @@ namespace QuickNote.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("QuickNote.Models.Note", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("QuickNote.Models.NoteTag", b =>
                 {
                     b.HasOne("QuickNote.Models.Note", "Note")
                         .WithMany("NoteTags")
                         .HasForeignKey("NoteId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("QuickNote.Models.Tag", "Tag")
                         .WithMany("NoteTags")
                         .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Note");
 
                     b.Navigation("Tag");
+                });
+
+            modelBuilder.Entity("QuickNote.Models.Tag", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("QuickNote.Models.Note", b =>
